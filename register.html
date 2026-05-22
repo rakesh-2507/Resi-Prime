@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>RESI_PRIME Admin Register</title>
+
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #252a34;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .top-wave {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 180px;
+            background: #61676b;
+            border-bottom-left-radius: 50% 20%;
+            border-bottom-right-radius: 50% 20%;
+            z-index: 1;
+        }
+
+        .bottom-wave {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            background: #61676b;
+            border-top-left-radius: 50% 20%;
+            border-top-right-radius: 50% 20%;
+            z-index: 1;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 520px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            position: relative;
+            z-index: 10;
+        }
+
+        .register-card h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #252a34;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-box input,
+        .input-box select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .input-box input:focus,
+        .input-box select:focus {
+            border-color: #61676b;
+            box-shadow: 0 0 0 3px rgba(97, 103, 107, 0.2);
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: #61676b;
+            color: white;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .3s;
+            margin-top: 10px;
+        }
+
+        .register-btn:hover {
+            background: #4e5457;
+        }
+
+        .bottom-text {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .bottom-text a {
+            color: #61676b;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff4d4f;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: .4s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .success {
+            background: #28a745 !important;
+        }
+
+        @media(max-width:600px) {
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TOP -->
+    <div class="top-wave"></div>
+
+    <!-- REGISTER CARD -->
+    <div class="register-card">
+
+        <div class="d-flex justify-content-center">
+            <img src="/assets/web_logo.png" width="15%" alt="Resi_Prime Logo">
+        </div>
+
+        <form id="registerForm">
+
+            <!-- NAME -->
+            <div class="form-group">
+
+                <label>Full Name</label>
+
+                <div class="input-box">
+                    <input type="text" id="name" placeholder="Enter Full Name" required>
+                </div>
+
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+
+                <label>Email</label>
+
+                <div class="input-box">
+                    <input type="email" id="email" placeholder="Enter Email" required>
+                </div>
+
+            </div>
+
+            <!-- PHONE -->
+            <div class="row">
+
+                <div class="form-group">
+
+                    <label>Code</label>
+
+                    <div class="input-box">
+
+                        <select id="countryCode">
+
+                            <option value="+91">
+                                +91
+                            </option>
+
+                            <option value="+1">
+                                +1
+                            </option>
+
+                            <option value="+44">
+                                +44
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Phone Number</label>
+
+                    <div class="input-box">
+
+                        <input type="text" id="phone" placeholder="Phone Number" required>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- APARTMENT -->
+            <div class="form-group">
+
+                <label>Apartment</label>
+
+                <div class="input-box">
+
+                    <select id="apartment" required>
+
+                        <option value="">
+                            Select Apartment
+                        </option>
+
+                        <option value="Green Residency">
+                            Green Residency
+                        </option>
+
+                        <option value="Sky Towers">
+                            Sky Towers
+                        </option>
+
+                        <option value="Palm Heights">
+                            Palm Heights
+                        </option>
+
+                        <option value="Ocean View">
+                            Ocean View
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- FLAT + FLOOR -->
+            <div class="row">
+
+                <div class="form-group">
+
+                    <label>Flat Number</label>
+
+                    <div class="input-box">
+
+                        <input type="text" id="flat" placeholder="Flat Number" required>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Floor</label>
+
+                    <div class="input-box">
+
+                        <input type="text" id="floor" placeholder="Floor" required>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ROLE -->
+            <div class="form-group">
+
+                <label>Role</label>
+
+                <div class="input-box">
+
+                    <input type="text" id="role" value="Admin" readonly>
+
+                </div>
+
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <div class="input-box">
+
+                    <input type="password" id="password" placeholder="********" required>
+
+                    <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+
+                </div>
+
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group">
+
+                <label>Confirm Password</label>
+
+                <div class="input-box">
+
+                    <input type="password" id="confirmPassword" placeholder="********" required>
+
+                </div>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button type="submit" class="register-btn">
+
+                Register
+
+            </button>
+
+            <!-- LOGIN -->
+            <div class="bottom-text">
+
+                Already have an account?
+
+                <a href="index.html">
+                    Login
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="bottom-wave"></div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+
+        import {
+            auth,
+            db
+        } from './firebase-config.js';
+
+        import {
+            createUserWithEmailAndPassword,
+            sendEmailVerification
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        import {
+            doc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        // ================= ELEMENTS =================
+
+        const registerForm =
+            document.getElementById('registerForm');
+
+        const passwordInput =
+            document.getElementById('password');
+
+        const togglePassword =
+            document.getElementById('togglePassword');
+
+        // ================= TOAST =================
+
+        function showToast(
+            message,
+            success = false
+        ) {
+
+            const toast =
+                document.getElementById("toast");
+
+            toast.innerText =
+                message;
+
+            toast.classList.add("show");
+
+            if (success) {
+
+                toast.classList.add("success");
+
+            } else {
+
+                toast.classList.remove("success");
+            }
+
+            setTimeout(() => {
+
+                toast.classList.remove("show");
+
+            }, 3000);
+        }
+
+        // ================= REGISTER =================
+
+        registerForm.addEventListener(
+            'submit',
+            async (e) => {
+
+                e.preventDefault();
+
+                // GET VALUES
+                const name =
+                    document.getElementById('name').value.trim();
+
+                const email =
+                    document.getElementById('email').value.trim();
+
+                const countryCode =
+                    document.getElementById('countryCode').value;
+
+                const phone =
+                    document.getElementById('phone').value.trim();
+
+                const apartment =
+                    document.getElementById('apartment').value;
+
+                const flat =
+                    document.getElementById('flat').value.trim();
+
+                const floor =
+                    document.getElementById('floor').value.trim();
+
+                const password =
+                    document.getElementById('password').value;
+
+                const confirmPassword =
+                    document.getElementById('confirmPassword').value;
+
+                // VALIDATION
+                if (password !== confirmPassword) {
+
+                    showToast(
+                        "Passwords do not match"
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    // CREATE FIREBASE AUTH USER
+                    const userCredential =
+                        await createUserWithEmailAndPassword(
+                            auth,
+                            email,
+                            password
+                        );
+
+                    const user =
+                        userCredential.user;
+
+                    // SEND VERIFICATION EMAIL
+                    await sendEmailVerification(user);
+
+                    // SAVE USER TO FIRESTORE
+                    await setDoc(
+                        doc(db, "users", user.uid),
+                        {
+                            uid: user.uid,
+
+                            name,
+
+                            email,
+
+                            phone:
+                                `${countryCode}${phone}`,
+
+                            apartment,
+
+                            flat,
+
+                            floor,
+
+                            role: "Admin",
+
+                            status: "pending",
+
+                            emailVerified: false,
+
+                            createdAt:
+                                serverTimestamp()
+                        }
+                    );
+
+                    // STORE TEMP USER
+                    localStorage.setItem(
+                        "pendingUser",
+                        JSON.stringify({
+                            uid: user.uid,
+                            email: user.email
+                        })
+                    );
+
+                    // SUCCESS
+                    showToast(
+                        "Verification Email Sent",
+                        true
+                    );
+
+                    // REDIRECT
+                    setTimeout(() => {
+
+                        window.location.href =
+                            "verification.html";
+
+                    }, 1500);
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    let errorMessage =
+                        "Registration Failed";
+
+                    // FIREBASE ERRORS
+                    switch (error.code) {
+
+                        case "auth/email-already-in-use":
+                            errorMessage =
+                                "Email already registered";
+                            break;
+
+                        case "auth/invalid-email":
+                            errorMessage =
+                                "Invalid email address";
+                            break;
+
+                        case "auth/weak-password":
+                            errorMessage =
+                                "Password should be at least 6 characters";
+                            break;
+
+                        case "permission-denied":
+                            errorMessage =
+                                "Firestore permission denied";
+                            break;
+
+                        default:
+                            errorMessage =
+                                error.message;
+                    }
+
+                    showToast(errorMessage);
+                }
+            }
+        );
+
+        // ================= TOGGLE PASSWORD =================
+
+        togglePassword.addEventListener(
+            'click',
+            () => {
+
+                if (
+                    passwordInput.type === "password"
+                ) {
+
+                    passwordInput.type = "text";
+
+                    togglePassword.classList.remove(
+                        'fa-eye'
+                    );
+
+                    togglePassword.classList.add(
+                        'fa-eye-slash'
+                    );
+
+                } else {
+
+                    passwordInput.type = "password";
+
+                    togglePassword.classList.remove(
+                        'fa-eye-slash'
+                    );
+
+                    togglePassword.classList.add(
+                        'fa-eye'
+                    );
+                }
+            }
+        );
+
+    </script>
+</body>
+
+</html>

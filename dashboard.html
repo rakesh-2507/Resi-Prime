@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/auth-guard.js"></script>
+
+    <script type="module">
+
+        import { auth } from "./firebase-config.js";
+
+        import {
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+
+            if (!user) {
+
+                window.location.href = "/index.html";
+            }
+        });
+
+    </script>
+</head>
+
+<body style="background:#f4f7fe; display:none; min-height:100vh; overflow-x:hidden;">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+            <i class="fa-solid fa-building"></i>
+            Admin Panel
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="maintenance.html">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    Maintenance
+                </a>
+            </li>
+
+            <li>
+                <a href="gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents;">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo">
+            </a>
+        </div>
+
+
+    </aside>
+
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <h1>Admin Dashboard</h1>
+
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Welcome Admin
+            </div>
+
+        </div>
+
+        <!-- DASHBOARD CARDS -->
+
+        <div class="dashboard-grid">
+
+            <a href="approvals.html" class="card blue">
+                <div class="icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <h3>Pending Approvals</h3>
+                <p>Manage all pending requests</p>
+            </a>
+
+            <a href="complaints.html" class="card red">
+                <div class="icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3>Complaints</h3>
+                <p>Track resident complaints</p>
+            </a>
+
+            <a href="visitors.html" class="card green">
+                <div class="icon">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h3>Visitor Logs</h3>
+                <p>Monitor visitor entries</p>
+            </a>
+
+            <a href="residents.html" class="card purple">
+                <div class="icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h3>Residents</h3>
+                <p>Manage residents data</p>
+            </a>
+
+            <a href="amenities.html" class="card orange">
+                <div class="icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <h3>Amenities</h3>
+                <p>View amenities bookings</p>
+            </a>
+
+            <a href="bookings.html" class="card cyan">
+                <div class="icon">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <h3>Bookings</h3>
+                <p>Check all booking records</p>
+            </a>
+
+            <a href="staff.html" class="card blue">
+                <div class="icon">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h3>Staff</h3>
+                <p>Manage staff members</p>
+            </a>
+
+            <a href="gallery.html" class="card purple">
+                <div class="icon">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+                <h3>Gallery</h3>
+                <p>Upload & manage images</p>
+            </a>
+
+            <a href="attendance.html" class="card green">
+                <div class="icon">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <h3>Staff Attendance</h3>
+                <p>Track daily attendance</p>
+            </a>
+
+            <a href="utility-bills.html" class="card orange">
+                <div class="icon">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h3>Utility Bills</h3>
+                <p>Manage electricity & water bills</p>
+            </a>
+
+            <a href="notices.html" class="card red">
+                <div class="icon">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <h3>Notices</h3>
+                <p>Publish society notices</p>
+            </a>
+
+            <a href="bill-status.html" class="card cyan">
+                <div class="icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h3>Bill Status</h3>
+                <p>Check paid & unpaid bills</p>
+            </a>
+            <a href="admin-panel.html" class="card dark">
+
+                <div class="icon">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+
+                <h3>Approve Admins</h3>
+
+                <p>
+                    Review & approve new admin registrations
+                </p>
+
+            </a>
+        </div>
+
+    </main>
+    <script>
+
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.getElementById("sidebar");
+
+        menuBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+        });
+
+    </script>
+    <script type="module">
+
+        import { auth } from "./firebase-config.js";
+
+        import {
+            signOut
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        const logoutBtn =
+            document.getElementById("logoutBtn");
+
+        logoutBtn.addEventListener(
+            "click",
+            async (e) => {
+
+                e.preventDefault();
+
+                const confirmLogout =
+                    confirm("Are you sure you want to logout?");
+
+                if (!confirmLogout) return;
+
+                try {
+
+                    // REMOVE SESSION
+                    localStorage.removeItem(
+                        "adminLoggedIn"
+                    );
+
+                    // FIREBASE LOGOUT
+                    await signOut(auth);
+
+                    // REDIRECT
+                    window.location.href =
+                        "/index.html";
+
+                } catch (error) {
+
+                    console.log(error);
+
+                    alert("Logout failed");
+                }
+            }
+        );
+
+    </script>
+</body>
+
+</html>

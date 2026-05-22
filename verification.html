@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0" />
+
+    <title>Email Verification</title>
+
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #252a34;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        .top-wave {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 180px;
+            background: #61676b;
+            border-bottom-left-radius: 50% 20%;
+            border-bottom-right-radius: 50% 20%;
+            z-index: 1;
+        }
+
+        .bottom-wave {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            background: #61676b;
+            border-top-left-radius: 50% 20%;
+            border-top-right-radius: 50% 20%;
+            z-index: 1;
+        }
+
+        .verify-card {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            animation: fadeUp .8s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .verify-icon {
+            width: 90px;
+            height: 90px;
+            background: rgba(97, 103, 107, .1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+            margin-bottom: 20px;
+        }
+
+        .verify-icon i {
+            font-size: 40px;
+            color: #61676b;
+        }
+
+        h2 {
+            color: #252a34;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: #61676b;
+            color: white;
+            font-size: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .verify-btn:hover {
+            background: #4e5457;
+        }
+
+        .verify-btn:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
+
+        .status-text {
+            margin-top: 18px;
+            color: #888;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff4d4f;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: .4s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .success {
+            background: #28a745 !important;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TOP -->
+    <div class="top-wave"></div>
+
+    <!-- CARD -->
+    <div class="verify-card">
+
+        <div class="verify-icon">
+            <i class="fa-solid fa-envelope-circle-check"></i>
+        </div>
+
+        <h2>Email Verification</h2>
+
+        <p>
+            We've sent a verification email to your registered email address.
+            <br><br>
+            Please verify your email and return here to continue.
+        </p>
+
+        <button class="verify-btn"
+            id="resendBtn">
+
+            Resend Verification Email
+
+        </button>
+
+        <div class="status-text"
+            id="statusText">
+
+            Checking verification status...
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="bottom-wave"></div>
+
+    <!-- TOAST -->
+    <div class="toast"
+        id="toast"></div>
+
+    <script type="module">
+
+        import {
+            auth,
+            db
+        } from "./firebase-config.js";
+
+        import {
+            onAuthStateChanged,
+            sendEmailVerification,
+            reload,
+            signOut
+        }
+            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        import {
+            doc,
+            getDoc,
+            updateDoc
+        }
+            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        // ================= ELEMENTS =================
+
+        const resendBtn =
+            document.getElementById("resendBtn");
+
+        const statusText =
+            document.getElementById("statusText");
+
+        let checking = false;
+
+        // ================= TOAST =================
+
+        function showToast(
+            message,
+            success = false
+        ) {
+
+            const toast =
+                document.getElementById("toast");
+
+            toast.innerText =
+                message;
+
+            toast.classList.add("show");
+
+            if (success) {
+
+                toast.classList.add("success");
+
+            } else {
+
+                toast.classList.remove("success");
+            }
+
+            setTimeout(() => {
+
+                toast.classList.remove("show");
+
+            }, 3000);
+        }
+
+        // ================= SEND VERIFICATION EMAIL =================
+
+        async function sendVerificationEmail() {
+
+            try {
+
+                const user =
+                    auth.currentUser;
+
+                if (!user) return;
+
+                if (user.emailVerified) {
+
+                    showToast(
+                        "Email already verified"
+                    );
+
+                    return;
+                }
+
+                resendBtn.disabled = true;
+
+                resendBtn.innerHTML =
+                    "Sending...";
+
+                await sendEmailVerification(user);
+
+                showToast(
+                    "Verification email sent",
+                    true
+                );
+
+            } catch (error) {
+
+                console.log(error);
+
+                showToast(
+                    "Failed to send verification email"
+                );
+
+            } finally {
+
+                resendBtn.disabled = false;
+
+                resendBtn.innerHTML =
+                    "Resend Verification Email";
+            }
+        }
+
+        // ================= CHECK VERIFICATION =================
+
+        async function checkVerification() {
+
+            if (checking) return;
+
+            checking = true;
+
+            try {
+
+                let user =
+                    auth.currentUser;
+
+                if (!user) {
+
+                    window.location.href =
+                        "/index.html";
+
+                    return;
+                }
+
+                // RELOAD USER
+                await reload(user);
+
+                // REFRESH USER
+                user =
+                    auth.currentUser;
+
+                const userRef =
+                    doc(db, "users", user.uid);
+
+                const userSnap =
+                    await getDoc(userRef);
+
+                // USER DOC NOT FOUND
+                if (!userSnap.exists()) {
+
+                    await signOut(auth);
+
+                    window.location.href =
+                        "/index.html";
+
+                    return;
+                }
+
+                const userData =
+                    userSnap.data();
+
+                // ALLOW ONLY ADMINS
+                if (userData.role !== "Admin") {
+
+                    await signOut(auth);
+
+                    window.location.href =
+                        "/index.html";
+
+                    return;
+                }
+
+                // EMAIL NOT VERIFIED
+                if (!user.emailVerified) {
+
+                    statusText.innerHTML =
+                        "Please verify your email to continue";
+
+                    return;
+                }
+
+                // UPDATE FIRESTORE VERIFIED STATUS
+                if (!userData.emailVerified) {
+
+                    await updateDoc(userRef, {
+                        emailVerified: true
+                    });
+                }
+
+                // WAITING FOR APPROVAL
+                if (userData.status !== "approved") {
+
+                    statusText.innerHTML =
+                        "<strong style='color:#000;'>Email verified • Waiting for admin approval</strong>";
+
+                    return;
+                }
+
+                // APPROVED
+                statusText.innerHTML =
+                    "Account approved successfully";
+
+                showToast(
+                    "Redirecting to dashboard...",
+                    true
+                );
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "/dashboard.html";
+
+                }, 1500);
+
+            } catch (error) {
+
+                console.log(error);
+
+                showToast(
+                    "Something went wrong"
+                );
+
+            } finally {
+
+                checking = false;
+            }
+        }
+
+        // ================= AUTH GUARD =================
+
+        onAuthStateChanged(
+            auth,
+            async (user) => {
+
+                // NOT LOGGED IN
+                if (!user) {
+
+                    window.location.href =
+                        "/index.html";
+
+                    return;
+                }
+
+                try {
+
+                    // GET USER DATA
+                    const userRef =
+                        doc(db, "users", user.uid);
+
+                    const userSnap =
+                        await getDoc(userRef);
+
+                    // USER DOC NOT FOUND
+                    if (!userSnap.exists()) {
+
+                        await signOut(auth);
+
+                        window.location.href =
+                            "/index.html";
+
+                        return;
+                    }
+
+                    const userData =
+                        userSnap.data();
+
+                    // ONLY ADMINS
+                    if (userData.role !== "Admin") {
+
+                        await signOut(auth);
+
+                        window.location.href =
+                            "/index.html";
+
+                        return;
+                    }
+
+                    // SHOW PAGE
+                    document.body.style.display =
+                        "flex";
+
+                    // AUTO SEND EMAIL
+                    if (!user.emailVerified) {
+
+                        sendVerificationEmail();
+                    }
+
+                    // START CHECKING
+                    checkVerification();
+
+                } catch (error) {
+
+                    console.log(error);
+
+                    window.location.href =
+                        "/index.html";
+                }
+            }
+        );
+
+        // ================= RESEND BUTTON =================
+
+        resendBtn.addEventListener(
+            "click",
+            sendVerificationEmail
+        );
+
+        // ================= AUTO CHECK =================
+
+        setInterval(() => {
+
+            checkVerification();
+
+        }, 5000);
+
+        // ================= TAB ACTIVE CHECK =================
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (!document.hidden) {
+
+                    checkVerification();
+                }
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
