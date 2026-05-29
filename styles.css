@@ -197,6 +197,14 @@
   box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
 }
 
+.menu li.active {
+  background: #3b82f6;
+  color: #fff;
+  transform: translateX(5px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+}
+
 .menu li a i {
   font-size: 18px;
   width: 25px;
@@ -207,7 +215,6 @@
 
 .main {
   margin-left: 270px;
-  width: 100%;
   padding: 30px;
 }
 
