@@ -5,7 +5,6 @@
     <title>RESI_PRIME</title>
 
     <style>
-
         .user-card {
             background: white;
             border-radius: 10px;
@@ -161,7 +160,18 @@
             No Pending Approvals
         </div>
     </main>
-    <script>
+    <script type="module">
+
+        import { db } from "/firebase-config.js";
+
+        import {
+            collection,
+            query,
+            where,
+            onSnapshot,
+            doc,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
         const statusPending = "pending";
         const statusApproved = "approved";
@@ -169,54 +179,97 @@
 
         const container = document.getElementById("usersContainer");
 
-        function updateStatus(userId, status) {
+        async function updateStatus(userId, status) {
 
-            db.collection("users")
-                .doc(userId)
-                .update({
-                    status: status
-                })
-                .then(() => {
-                    alert(`User ${status} successfully`);
-                })
-                .catch(err => {
-                    alert(err.message);
-                });
+            try {
+
+                await updateDoc(
+                    doc(db, "users", userId),
+                    {
+                        status: status
+                    }
+                );
+
+                alert(`User ${status} successfully`);
+
+            } catch (err) {
+
+                console.error(err);
+
+                alert(err.message);
+
+            }
+
         }
 
-        function confirmAction(userId, status, name) {
+        window.confirmAction = function (userId, status, name) {
 
             const ok = confirm(
                 `Are you sure you want to ${status} ${name}?`
             );
 
             if (ok) {
-                updateStatus(userId, status);
-            }
-        }
 
-        db.collection("users")
-            .where("status", "==", statusPending)
-            .where("role", "in", ["Resident", "Watchman"])
-            .onSnapshot((snapshot) => {
+                updateStatus(
+                    userId,
+                    status
+                );
+
+            }
+
+        };
+
+        const usersQuery = query(
+
+            collection(db, "users"),
+
+            where(
+                "status",
+                "==",
+                statusPending
+            ),
+
+            where(
+                "role",
+                "in",
+                ["Resident", "Watchman"]
+            )
+
+        );
+
+        onSnapshot(
+            usersQuery,
+            (snapshot) => {
 
                 container.innerHTML = "";
 
                 if (snapshot.empty) {
-                    container.innerHTML =
-                        `<div class="empty">
-            No pending approvals
-        </div>`;
+
+                    container.innerHTML = `
+
+            <div class="empty">
+
+                No pending approvals
+
+            </div>
+
+            `;
+
                     return;
+
                 }
 
-                snapshot.forEach(doc => {
+                snapshot.forEach((documentData) => {
 
-                    const user = doc.data();
+                    const user = documentData.data();
 
                     const photo =
-                        user.photo && user.photo !== ""
+
+                        user.photo &&
+                            user.photo !== ""
+
                             ? user.photo
+
                             : "https://via.placeholder.com/55";
 
                     const card = document.createElement("div");
@@ -224,50 +277,64 @@
                     card.className = "user-card";
 
                     card.innerHTML = `
-        
-        <div class="user-info">
 
-            <img class="avatar" src="${photo}">
+            <div class="user-info">
 
-            <div>
-                <h4>${user.name || "No Name"}</h4>
-                <div>${user.email || ""}</div>
-                <small>${user.role || ""}</small>
+                <img class="avatar" src="${photo}">
+
+                <div>
+
+                    <h4>${user.name || "No Name"}</h4>
+
+                    <div>${user.email || ""}</div>
+
+                    <small>${user.role || ""}</small>
+
+                </div>
+
             </div>
 
-        </div>
+            <div>
 
-        <div>
+                <button 
+                    class="btn approve"
 
-            <button class="btn approve"
-            onclick="confirmAction(
-            '${doc.id}',
-            '${statusApproved}',
-            '${user.name || ""}'
-            )">
-            Approve
-            </button>
+                    onclick="confirmAction(
+                        '${documentData.id}',
+                        '${statusApproved}',
+                        '${user.name || ""}'
+                    )">
 
-            <button class="btn reject"
-            onclick="confirmAction(
-            '${doc.id}',
-            '${statusRejected}',
-            '${user.name || ""}'
-            )">
-            Reject
-            </button>
+                    Approve
 
-        </div>
-        `;
+                </button>
+
+                <button 
+                    class="btn reject"
+
+                    onclick="confirmAction(
+                        '${documentData.id}',
+                        '${statusRejected}',
+                        '${user.name || ""}'
+                    )">
+
+                    Reject
+
+                </button>
+
+            </div>
+
+            `;
 
                     container.appendChild(card);
 
                 });
 
-            });
+            }
+
+        );
 
     </script>
-
 </body>
 
 </html>
