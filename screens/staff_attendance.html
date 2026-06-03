@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/auth-guard.js"></script>
+    <style>
+        .attendance-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body style="background: #f4f7fe">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none; color: inherit">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo" />
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h1>Staff Attendance</h1>
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Administrator
+            </div>
+        </div>
+        <div id="attendanceContainer" class="card_container">
+
+            Loading...
+
+        </div>
+    </main>
+    <script type="module">
+
+        import { db } from "/firebase-config.js";
+
+        import {
+            collection,
+            query,
+            orderBy,
+            onSnapshot,
+            doc,
+            getDoc
+        }
+            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        const attendanceContainer =
+            document.getElementById(
+                "attendanceContainer"
+            );
+
+
+        /* ---------------- TIME FORMAT ---------------- */
+
+        function formatTime(timestamp) {
+
+            if (!timestamp) return "--";
+
+            const date =
+                timestamp.toDate();
+
+            return date.toLocaleTimeString(
+                "en-IN",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                }
+            );
+
+        }
+
+
+        /* ---------------- LOAD ATTENDANCE ---------------- */
+
+        function loadAttendance() {
+
+            const attendanceQuery = query(
+
+                collection(
+                    db,
+                    "staff_attendance"
+                ),
+
+                orderBy(
+                    "loginTime",
+                    "desc"
+                )
+
+            );
+
+            onSnapshot(
+
+                attendanceQuery,
+
+                async (snapshot) => {
+
+                    attendanceContainer.innerHTML = "";
+
+                    if (snapshot.empty) {
+
+                        attendanceContainer.innerHTML = `
+
+<div class="text-center p-4">
+
+No attendance records found
+
+</div>
+
+`;
+
+                        return;
+
+                    }
+
+                    for (const attendanceDoc of snapshot.docs) {
+
+                        const attData =
+                            attendanceDoc.data();
+
+                        const staffId =
+                            attData.staffId;
+
+                        let staffName =
+                            "No Name";
+
+                        try {
+
+                            const staffSnap =
+                                await getDoc(
+
+                                    doc(
+                                        db,
+                                        "staff",
+                                        staffId
+                                    )
+
+                                );
+
+                            if (staffSnap.exists()) {
+
+                                const staffData =
+                                    staffSnap.data();
+
+                                staffName =
+                                    staffData.name || "No Name";
+
+                            }
+
+                        } catch (err) {
+
+                            console.log(
+                                "Staff fetch error",
+                                err
+                            );
+
+                        }
+
+                        const loginTime =
+                            formatTime(
+                                attData.loginTime
+                            );
+
+                        const logoutTime =
+                            formatTime(
+                                attData.logoutTime
+                            );
+
+                        const card =
+                            document.createElement(
+                                "div"
+                            );
+
+                        card.className =
+                            "attendance-card mb-3";
+
+                        card.innerHTML = `
+
+<div class="d-flex justify-content-between align-items-center">
+
+<div>
+
+<h5 class="mb-2">
+
+${staffName}
+
+</h5>
+
+<p class="mb-1">
+
+<strong>Login:</strong>
+
+${loginTime}
+
+</p>
+
+<p class="mb-0">
+
+<strong>Logout:</strong>
+
+${logoutTime}
+
+</p>
+
+</div>
+
+<div>
+
+<i class="fa-solid fa-user-check fa-2x text-primary"></i>
+
+</div>
+
+</div>
+
+`;
+
+                        attendanceContainer
+                            .appendChild(card);
+
+                    }
+
+                },
+
+                (error) => {
+
+                    console.log(error);
+
+                    attendanceContainer.innerHTML = `
+
+<div class="text-danger p-4">
+
+${error.message}
+
+</div>
+
+`;
+
+                }
+
+            );
+
+        }
+
+
+        loadAttendance();
+
+    </script>
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>

@@ -53,6 +53,12 @@
 
         <ul class="menu">
 
+            <li class="active">
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
             <li>
                 <a href="/screens/complaints.html">
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -61,42 +67,35 @@
             </li>
 
             <li>
-                <a href="residents.html">
+                <a href="/screens/residents.html">
                     <i class="fa-solid fa-users"></i>
                     Residents
                 </a>
             </li>
 
             <li>
-                <a href="staff.html">
+                <a href="/screens/staff.html">
                     <i class="fa-solid fa-user-tie"></i>
                     Staff
                 </a>
             </li>
 
             <li>
-                <a href="bookings.html">
+                <a href="/screens/bookings.html">
                     <i class="fa-solid fa-calendar-check"></i>
                     Bookings
                 </a>
             </li>
 
             <li>
-                <a href="maintenance.html">
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-                    Maintenance
-                </a>
-            </li>
-
-            <li>
-                <a href="gallery.html">
+                <a href="/screens/gallery.html">
                     <i class="fa-solid fa-image"></i>
                     Gallery
                 </a>
             </li>
 
             <li>
-                <a href="profile.html">
+                <a href="/screens/profile.html">
                     <i class="fa-solid fa-user"></i>
                     Profile
                 </a>
@@ -153,7 +152,7 @@
                 <p>Track resident complaints</p>
             </a>
 
-            <a href="visitors.html" class="card green">
+            <a href="/screens/visitors.html" class="card green">
                 <div class="icon">
                     <i class="fa-solid fa-id-card"></i>
                 </div>
@@ -169,7 +168,7 @@
                 <p>Manage residents data</p>
             </a>
 
-            <a href="amenities.html" class="card orange">
+            <a href="/screens/amenities.html" class="card orange">
                 <div class="icon">
                     <i class="fa-solid fa-dumbbell"></i>
                 </div>
@@ -177,7 +176,7 @@
                 <p>View amenities bookings</p>
             </a>
 
-            <a href="bookings.html" class="card cyan">
+            <a href="/screens/bookings.html" class="card cyan">
                 <div class="icon">
                     <i class="fa-solid fa-calendar-days"></i>
                 </div>
@@ -185,7 +184,7 @@
                 <p>Check all booking records</p>
             </a>
 
-            <a href="staff.html" class="card blue">
+            <a href="/screens/staff.html" class="card blue">
                 <div class="icon">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
@@ -193,7 +192,7 @@
                 <p>Manage staff members</p>
             </a>
 
-            <a href="gallery.html" class="card purple">
+            <a href="/screens/gallery.html" class="card purple">
                 <div class="icon">
                     <i class="fa-solid fa-image"></i>
                 </div>
@@ -201,7 +200,7 @@
                 <p>Upload & manage images</p>
             </a>
 
-            <a href="attendance.html" class="card green">
+            <a href="/screens/staff_attendance.html" class="card green">
                 <div class="icon">
                     <i class="fa-solid fa-user-check"></i>
                 </div>
@@ -209,7 +208,7 @@
                 <p>Track daily attendance</p>
             </a>
 
-            <a href="utility-bills.html" class="card orange">
+            <a href="/screens/utility_bills.html" class="card orange">
                 <div class="icon">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
                 </div>
@@ -217,7 +216,7 @@
                 <p>Manage electricity & water bills</p>
             </a>
 
-            <a href="notices.html" class="card red">
+            <a href="/screens/notices.html" class="card red">
                 <div class="icon">
                     <i class="fa-solid fa-bullhorn"></i>
                 </div>
@@ -225,85 +224,25 @@
                 <p>Publish society notices</p>
             </a>
 
-            <a href="bill-status.html" class="card cyan">
+            <a href="/screens/bill_status.html" class="card cyan">
                 <div class="icon">
                     <i class="fa-solid fa-wallet"></i>
                 </div>
                 <h3>Bill Status</h3>
                 <p>Check paid & unpaid bills</p>
             </a>
-            <a href="admin-panel.html" class="card dark">
-
+             <a href="/screens/bill_status.html" class="card purple">
                 <div class="icon">
-                    <i class="fa-solid fa-user-shield"></i>
+                    <i class="fa-solid fa-shield"></i>
                 </div>
-
                 <h3>Approve Admins</h3>
-
-                <p>
-                    Review & approve new admin registrations
-                </p>
-
+                <p>Review & approve new admin registrations</p>
             </a>
+
         </div>
 
     </main>
-    <script>
-
-        const menuBtn = document.getElementById("menuBtn");
-        const sidebar = document.getElementById("sidebar");
-
-        menuBtn.addEventListener("click", () => {
-            sidebar.classList.toggle("active");
-        });
-
-    </script>
-    <script type="module">
-
-        import { auth } from "./firebase-config.js";
-
-        import {
-            signOut
-        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-
-        const logoutBtn =
-            document.getElementById("logoutBtn");
-
-        logoutBtn.addEventListener(
-            "click",
-            async (e) => {
-
-                e.preventDefault();
-
-                const confirmLogout =
-                    confirm("Are you sure you want to logout?");
-
-                if (!confirmLogout) return;
-
-                try {
-
-                    // REMOVE SESSION
-                    localStorage.removeItem(
-                        "adminLoggedIn"
-                    );
-
-                    // FIREBASE LOGOUT
-                    await signOut(auth);
-
-                    // REDIRECT
-                    window.location.href =
-                        "/index.html";
-
-                } catch (error) {
-
-                    console.log(error);
-
-                    alert("Logout failed");
-                }
-            }
-        );
-
-    </script>
+    <script type="module" src="/script.js"></script>
 </body>
 
 </html>

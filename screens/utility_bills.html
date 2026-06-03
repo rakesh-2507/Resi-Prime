@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Bills</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/auth-guard.js"></script>
+    <style>
+        .bill-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body style="background: #f4f7fe">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none; color: inherit">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo" />
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h1>Utility Bills</h1>
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Administrator
+            </div>
+        </div>
+        <div class="bill-card">
+
+            <form id="billForm">
+
+                <!-- Utility Type -->
+                <div class="mb-3">
+                    <label class="form-label">Utility Type</label>
+                    <select id="utilityType" class="form-select">
+                        <option value="sewage">Sewage Management</option>
+                        <option value="maintenance">Maintenance Bill</option>
+                        <option value="other">Other Services</option>
+                    </select>
+                </div>
+
+                <!-- Service -->
+                <div class="mb-3 d-none" id="serviceWrapper">
+                    <label class="form-label">Service</label>
+                    <select id="serviceName" class="form-select">
+                        <option>Swimming Pool Membership</option>
+                        <option>Gym</option>
+                        <option>Club</option>
+                    </select>
+                </div>
+
+                <!-- Resident -->
+                <div class="mb-3 d-none" id="residentWrapper">
+                    <label class="form-label">Select Resident</label>
+                    <select id="residentSelect" class="form-select">
+                        <option value="">Loading Residents...</option>
+                    </select>
+                </div>
+
+                <!-- Bill Month -->
+                <div class="mb-3">
+                    <label class="form-label">Bill Month</label>
+                    <input type="month" id="billMonth" class="form-control">
+                </div>
+
+                <!-- Dates -->
+                <div class="row d-none" id="dateWrapper">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Start Date</label>
+                        <input type="date" id="startDate" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>End Date</label>
+                        <input type="date" id="endDate" class="form-control">
+                    </div>
+
+                </div>
+
+                <!-- Amount -->
+                <div class="mb-3">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="amount" class="form-control">
+                </div>
+
+                <!-- Due Date -->
+                <div class="mb-3">
+                    <label>Due Date</label>
+                    <input type="date" id="dueDate" class="form-control">
+                </div>
+
+                <button class="btn btn-primary w-100">
+                    Create Utility Bill
+                </button>
+
+            </form>
+
+        </div>
+    </main>
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            query,
+            where,
+            getDocs,
+            Timestamp
+        } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            // config
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const utilityType = document.getElementById("utilityType");
+        const serviceWrapper = document.getElementById("serviceWrapper");
+        const residentWrapper = document.getElementById("residentWrapper");
+        const dateWrapper = document.getElementById("dateWrapper");
+        const residentSelect = document.getElementById("residentSelect");
+
+
+        // ---------------- TOGGLE UI ----------------
+
+        utilityType.addEventListener("change", () => {
+
+            const other = utilityType.value === "other";
+
+            serviceWrapper.classList.toggle("d-none", !other);
+            residentWrapper.classList.toggle("d-none", !other);
+            dateWrapper.classList.toggle("d-none", !other);
+
+            loadResidents();
+
+        });
+
+
+        // ---------------- LOAD RESIDENTS ----------------
+
+        async function loadResidents() {
+
+            residentSelect.innerHTML = "";
+
+            const q = query(
+                collection(db, "users"),
+                where("role", "==", "Resident")
+            );
+
+            const snap = await getDocs(q);
+
+            residentSelect.innerHTML =
+                '<option value="">Select Resident</option>';
+
+            snap.forEach(doc => {
+
+                const data = doc.data();
+
+                residentSelect.innerHTML += `
+      <option value="${doc.id}">
+         ${data.name || "Resident"}
+      </option>
+      `;
+
+            });
+
+        }
+
+
+        // ---------------- MONTH NAME ----------------
+
+        function monthName(m) {
+
+            const months = [
+                "January", "February", "March",
+                "April", "May", "June",
+                "July", "August", "September",
+                "October", "November", "December"
+            ];
+
+            return months[m - 1];
+
+        }
+
+
+        // ---------------- CREATE BILL ----------------
+
+        document.getElementById("billForm")
+            .addEventListener("submit", async (e) => {
+
+                e.preventDefault();
+
+                const amount =
+                    parseFloat(document.getElementById("amount").value);
+
+                const dueDate =
+                    document.getElementById("dueDate").value;
+
+                const monthValue =
+                    document.getElementById("billMonth").value;
+
+                if (!monthValue || !amount || !dueDate) {
+
+                    alert("Fill all required fields");
+                    return;
+
+                }
+
+                const [year, month] = monthValue.split("-");
+
+                const billMonth =
+                    `${monthName(Number(month))} ${year}`;
+
+                const payload = {
+
+                    utilityType: utilityType.value,
+
+                    serviceName:
+                        utilityType.value === "sewage"
+                            ? "Sewage Management"
+                            : utilityType.value === "maintenance"
+                                ? "Maintenance"
+                                : document.getElementById("serviceName").value,
+
+                    billMonth,
+
+                    billMonthKey:
+                        `${year}-${month}`,
+
+                    amount,
+
+                    dueDate:
+                        Timestamp.fromDate(
+                            new Date(dueDate)
+                        ),
+
+                    status: "pending",
+
+                    createdAt:
+                        Timestamp.now()
+
+                };
+
+
+                // ---------- OTHER SERVICES ----------
+
+                if (utilityType.value === "other") {
+
+                    payload.residentId =
+                        residentSelect.value;
+
+                    payload.startDate =
+                        document.getElementById("startDate").value
+                            ? Timestamp.fromDate(
+                                new Date(
+                                    document.getElementById("startDate").value
+                                ))
+                            : null;
+
+                    payload.endDate =
+                        document.getElementById("endDate").value
+                            ? Timestamp.fromDate(
+                                new Date(
+                                    document.getElementById("endDate").value
+                                ))
+                            : null;
+
+                    await addDoc(
+                        collection(db, "utility_bills"),
+                        payload
+                    );
+
+                }
+
+
+                // ---------- ALL RESIDENTS ----------
+
+                else {
+
+                    const q = query(
+                        collection(db, "users"),
+                        where("role", "==", "Resident")
+                    );
+
+                    const residents =
+                        await getDocs(q);
+
+                    for (const resident of residents.docs) {
+
+                        await addDoc(
+                            collection(db, "utility_bills"),
+                            {
+                                ...payload,
+                                residentId: resident.id,
+                                startDate: null,
+                                endDate: null
+                            }
+                        );
+
+                    }
+
+                }
+
+                alert("Utility bill created");
+
+                document.getElementById("billForm").reset();
+
+            });
+
+        loadResidents();
+
+    </script>
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>

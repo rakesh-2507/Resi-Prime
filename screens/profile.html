@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Bills</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/auth-guard.js"></script>
+</head>
+
+<body style="background: #f4f7fe">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none; color: inherit">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo" />
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h1>Admin Profile</h1>
+
+            <button class="btn btn-primary" id="editBtn">
+                <i class="fa fa-edit"></i> Edit
+            </button>
+        </div>
+
+        <div class="container mt-4">
+
+            <div class="card shadow-sm p-4">
+
+                <div class="text-center mb-4">
+
+                    <div class="profile-wrapper">
+
+                        <img id="profileImage" src="/assets/default_user.png" class="rounded-circle" width="120"
+                            height="120" style="object-fit:cover; border:4px solid #ddd;">
+
+                        <input type="file" id="imageInput" hidden accept="image/*">
+
+                        <button id="cameraBtn" class="btn btn-primary rounded-circle"
+                            style="display:none; position:absolute; margin-left:-40px; margin-top:85px;">
+                            <i class="fa fa-camera"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Name</label>
+                        <input id="name" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Email</label>
+                        <input id="email" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Phone</label>
+                        <input id="phone" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Apartment</label>
+                        <input id="apartment" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Role</label>
+                        <input id="role" class="form-control" readonly>
+                    </div>
+
+                </div>
+
+                <button id="saveBtn" class="btn btn-success" style="display:none;">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { auth } from "/firebase-config.js";
+
+        import {
+            doc,
+            getDoc,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        import {
+            ref,
+            uploadBytes,
+            getDownloadURL
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js";
+
+        import {
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+        import {
+            db,
+            storage
+        } from "/firebase-config.js";
+
+        const nameField = document.getElementById("name");
+        const emailField = document.getElementById("email");
+        const phoneField = document.getElementById("phone");
+        const apartmentField = document.getElementById("apartment");
+        const roleField = document.getElementById("role");
+
+        const profileImage = document.getElementById("profileImage");
+
+        const editBtn = document.getElementById("editBtn");
+        const saveBtn = document.getElementById("saveBtn");
+
+        const imageInput = document.getElementById("imageInput");
+        const cameraBtn = document.getElementById("cameraBtn");
+
+        let editing = false;
+        let currentPhoto = "";
+
+        onAuthStateChanged(auth, async (user) => {
+
+            if (!user) {
+                location.href = "/index.html";
+                return;
+            }
+
+            loadProfile(user.uid);
+        });
+
+        async function loadProfile(uid) {
+
+            try {
+
+                const snapshot =
+                    await getDoc(
+                        doc(db, "users", uid)
+                    );
+
+                if (!snapshot.exists()) return;
+
+                const data = snapshot.data();
+
+                nameField.value = data.name || "";
+                emailField.value = data.email || "";
+                phoneField.value = data.phone || "";
+                apartmentField.value = data.apartment || "";
+                roleField.value = data.role || "";
+
+                currentPhoto = data.photo || "";
+
+                profileImage.src =
+                    currentPhoto ||
+                    "/assets/default_user.png";
+
+            } catch (e) {
+
+                console.log(e);
+            }
+        }
+
+        editBtn.addEventListener("click", () => {
+
+            editing = !editing;
+
+            phoneField.readOnly = !editing;
+            apartmentField.readOnly = !editing;
+            nameField.readOnly = !editing;
+
+            saveBtn.style.display =
+                editing ? "block" : "none";
+
+            cameraBtn.style.display =
+                editing ? "inline-block" : "none";
+        });
+
+        cameraBtn.addEventListener(
+            "click",
+            () => imageInput.click()
+        );
+
+        imageInput.addEventListener(
+            "change",
+            async (e) => {
+
+                const file = e.target.files[0];
+
+                if (!file) return;
+
+                const user = auth.currentUser;
+
+                try {
+
+                    const storageRef =
+                        ref(
+                            storage,
+                            `users/${user.uid}/profile.jpg`
+                        );
+
+                    await uploadBytes(
+                        storageRef,
+                        file
+                    );
+
+                    const url =
+                        await getDownloadURL(
+                            storageRef
+                        );
+
+                    currentPhoto = url;
+
+                    profileImage.src = url;
+
+                    await updateDoc(
+                        doc(db, "users", user.uid),
+                        {
+                            photo: url
+                        }
+                    );
+
+                } catch (err) {
+
+                    console.log(err);
+
+                    alert("Upload failed");
+                }
+            }
+        );
+
+        saveBtn.addEventListener(
+            "click",
+            async () => {
+
+                const user = auth.currentUser;
+
+                try {
+
+                    await updateDoc(
+                        doc(db, "users", user.uid),
+                        {
+                            name: nameField.value,
+                            phone: phoneField.value,
+                            apartment: apartmentField.value
+                        }
+                    );
+
+                    alert(
+                        "Profile updated successfully"
+                    );
+
+                    editing = false;
+
+                    saveBtn.style.display = "none";
+
+                } catch (e) {
+
+                    console.log(e);
+
+                    alert("Update failed");
+                }
+            }
+        );
+    </script>
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>

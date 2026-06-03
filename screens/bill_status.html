@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Bills</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/auth-guard.js"></script>
+    <style>
+        .bill-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body style="background: #f4f7fe">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none; color: inherit">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo" />
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h1>Utility Bill Status</h1>
+
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Administrator
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-4">
+
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#paidTab">
+
+                    Paid
+
+                </button>
+            </li>
+
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#unpaidTab">
+
+                    Unpaid
+
+                </button>
+            </li>
+
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active" id="paidTab">
+
+                <div id="paidBills">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+            <div class="tab-pane fade" id="unpaidTab">
+
+                <div id="unpaidBills">
+
+                    Loading...
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+    <script type="module">
+
+        import { db }
+            from "/firebase-config.js";
+
+        import {
+
+            collection,
+            query,
+            where,
+            orderBy,
+            onSnapshot,
+            getDoc,
+            doc
+
+        }
+            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+
+        const paidContainer =
+            document.getElementById(
+                "paidBills"
+            );
+
+        const unpaidContainer =
+            document.getElementById(
+                "unpaidBills"
+            );
+
+
+        // ---------------- LOAD BILLS ----------------
+
+        function loadBills(
+            status,
+            container
+        ) {
+
+            let q;
+
+            if (status === "paid") {
+
+                q = query(
+
+                    collection(
+                        db,
+                        "utility_bills"
+                    ),
+
+                    where(
+                        "status",
+                        "in",
+                        ["paid", "success"]
+                    ),
+
+                    orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+
+                );
+
+            }
+
+            else {
+
+                q = query(
+
+                    collection(
+                        db,
+                        "utility_bills"
+                    ),
+
+                    where(
+                        "status",
+                        "==",
+                        "pending"
+                    ),
+
+                    orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+
+                );
+
+            }
+
+            onSnapshot(
+
+                q,
+
+                async (snapshot) => {
+
+                    container.innerHTML =
+                        "";
+
+                    if (
+                        snapshot.empty
+                    ) {
+
+                        container.innerHTML = `
+
+                <div class="
+                text-center
+                p-4">
+
+                No
+                ${status}
+                bills found
+
+                </div>
+
+                `;
+
+                        return;
+
+                    }
+
+                    for (const billDoc of snapshot.docs) {
+
+                        const bill =
+                            billDoc.data();
+
+                        let resident =
+                            {};
+
+                        try {
+
+                            const residentSnap =
+                                await getDoc(
+
+                                    doc(
+                                        db,
+                                        "users",
+                                        bill.residentId
+                                    )
+
+                                );
+
+                            if (
+                                residentSnap.exists()
+                            ) {
+
+                                resident =
+                                    residentSnap.data();
+
+                            }
+
+                        }
+
+                        catch (e) {
+
+                            console.log(e);
+
+                        }
+
+                        const due =
+                            bill.dueDate?.toDate();
+
+                        container.innerHTML += `
+
+                <div class="
+                bill-card
+                mb-3">
+
+                    <div class="
+                    d-flex
+                    justify-content-between">
+
+                        <div>
+
+                            <h5>
+
+                            ${resident.name || "Unknown Resident"}
+
+                            </h5>
+
+                            <p class="mb-1">
+
+                            Flat:
+
+                            ${resident.flat || ""}
+
+                            -
+
+                            ${resident.floor || ""}
+
+                            </p>
+
+                            <p class="mb-1">
+
+                            Service:
+
+                            ${bill.serviceName || ""}
+
+                            </p>
+
+                            <p class="mb-1">
+
+                            Month:
+
+                            ${bill.billMonth || ""}
+
+                            </p>
+
+                            <p class="mb-1">
+
+                            Amount:
+
+                            ₹${bill.amount || 0}
+
+                            </p>
+
+                            <p class="mb-0">
+
+                            Due:
+
+                            ${due
+                                ? due.getDate()
+                                + "/"
+                                + (due.getMonth() + 1)
+                                + "/"
+                                + due.getFullYear()
+                                : "-"}
+
+                            </p>
+
+                        </div>
+
+                        <div class="
+                        d-flex
+                        align-items-center">
+
+                            <i class="
+                            fa-solid
+
+                            ${status === "paid"
+
+                                ? "fa-circle-check text-success"
+
+                                : "fa-circle-xmark text-danger"}
+
+                            fa-2x">
+
+                            </i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                `;
+
+                    }
+
+                }
+
+            );
+
+        }
+
+
+        loadBills(
+            "paid",
+            paidContainer
+        );
+
+        loadBills(
+            "pending",
+            unpaidContainer
+        );
+
+    </script>
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>

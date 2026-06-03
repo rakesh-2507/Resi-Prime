@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amenities Bookings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+        <script type="module" src="/auth-guard.js"></script>
+    <style>
+        .amenity-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+        }
+
+        .amenity-images {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .amenity-images img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .preview-img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body style="background: #f4f7fe">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none; color: inherit">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li class="active">
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo" />
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <h1>Amenity Bookings</h1>
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Administrator
+            </div>
+        </div>
+        <div id="amenitiesContainer" class="card_container">
+
+            Loading...
+
+        </div>
+    </main>
+    <script type="module">
+
+        import { db } from "/firebase-config.js";
+
+        import {
+            collection,
+            query,
+            orderBy,
+            onSnapshot,
+            doc,
+            getDoc,
+            updateDoc
+        }
+            from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        const amenitiesContainer =
+            document.getElementById(
+                "amenitiesContainer"
+            );
+
+
+
+        function formatDate(timestamp) {
+
+            if (!timestamp) return "";
+
+            const date =
+                timestamp.toDate();
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+
+        }
+
+
+
+        async function updateStatus(
+
+            docId,
+            status
+
+        ) {
+
+            try {
+
+                await updateDoc(
+
+                    doc(
+                        db,
+                        "amenity_bookings",
+                        docId
+                    ),
+
+                    {
+                        status
+                    }
+
+                );
+
+                alert(
+                    `Booking ${status}`
+                );
+
+            }
+
+            catch (err) {
+
+                console.log(err);
+
+                alert(
+                    err.message
+                );
+
+            }
+
+        }
+
+
+
+        function statusColor(status) {
+
+            if (status === "approved")
+                return "success";
+
+            if (status === "rejected")
+                return "danger";
+
+            return "warning";
+
+        }
+
+
+
+        function loadBookings() {
+
+            const q =
+                query(
+
+                    collection(
+                        db,
+                        "amenity_bookings"
+                    ),
+
+                    orderBy(
+                        "createdAt",
+                        "desc"
+                    )
+
+                );
+
+            onSnapshot(
+
+                q,
+
+                async (snapshot) => {
+
+                    amenitiesContainer.innerHTML = "";
+
+                    if (snapshot.empty) {
+
+                        amenitiesContainer.innerHTML = `
+
+<div class="text-center p-5">
+
+No booking requests
+
+</div>
+
+`;
+
+                        return;
+
+                    }
+
+                    for (
+
+                        const bookingDoc
+
+                        of snapshot.docs
+
+                    ) {
+
+                        const data =
+                            bookingDoc.data();
+
+                        const amenityId =
+                            data.amenityId;
+
+                        const userId =
+                            data.userId;
+
+
+
+                        /* Amenity */
+
+                        let amenityImages =
+                            [];
+
+                        try {
+
+                            const amenitySnap =
+                                await getDoc(
+
+                                    doc(
+                                        db,
+                                        "amenities",
+                                        amenityId
+                                    )
+
+                                );
+
+                            if (
+
+                                amenitySnap.exists()
+
+                            ) {
+
+                                amenityImages =
+
+                                    amenitySnap.data()
+
+                                        .images || [];
+
+                            }
+
+                        }
+
+                        catch (e) {
+
+                            console.log(e);
+
+                        }
+
+
+
+                        /* User */
+
+                        let user =
+                            {};
+
+                        try {
+
+                            const userSnap =
+                                await getDoc(
+
+                                    doc(
+                                        db,
+                                        "users",
+                                        userId
+                                    )
+
+                                );
+
+                            if (
+
+                                userSnap.exists()
+
+                            ) {
+
+                                user =
+                                    userSnap.data();
+
+                            }
+
+                        }
+
+                        catch (e) {
+
+                            console.log(e);
+
+                        }
+
+
+
+                        const imagesHTML =
+
+                            amenityImages
+
+                                .map(
+
+                                    img =>
+
+                                        `
+
+<img
+src="${img}"
+alt="amenity">
+
+`
+
+                                )
+
+                                .join("");
+
+
+
+                        const card =
+                            document.createElement(
+                                "div"
+                            );
+
+                        card.className =
+                            "amenity-card mb-3";
+
+                        card.innerHTML = `
+
+<h4>
+
+${data.amenityName || ""}
+
+</h4>
+
+<p>
+
+${data.description || ""}
+
+</p>
+
+<div class="amenity-images">
+
+${imagesHTML}
+
+</div>
+
+<hr>
+
+<p>
+
+<b>Date:</b>
+
+${formatDate(data.startDate)}
+
+-
+
+${formatDate(data.endDate)}
+
+</p>
+
+<p>
+
+<b>Time:</b>
+
+${data.startTime || ""}
+
+-
+
+${data.endTime || ""}
+
+</p>
+
+<p>
+
+<b>Participants:</b>
+
+${data.participants || 1}
+
+</p>
+
+<hr>
+
+<h6>
+
+Booked By
+
+</h6>
+
+<p>
+
+Name:
+
+${user.name || ""}
+
+</p>
+
+<p>
+
+Email:
+
+${user.email || ""}
+
+</p>
+
+<p>
+
+Phone:
+
+${user.phone || ""}
+
+</p>
+
+<p>
+
+Apartment:
+
+${user.apartment || ""}
+
+</p>
+
+<p>
+
+Flat:
+
+${user.flat || ""}
+
+|
+
+Floor:
+
+${user.floor || ""}
+
+</p>
+
+<div class="mt-3">
+
+<span class="badge bg-${statusColor(data.status)}">
+
+${(data.status || "").toUpperCase()}
+
+</span>
+
+</div>
+
+`;
+
+
+
+                        if (
+
+                            data.status ===
+                            "pending"
+
+                        ) {
+
+                            const btnRow =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            btnRow.className =
+                                "d-flex justify-content-end gap-2 mt-3";
+
+                            btnRow.innerHTML = `
+
+<button
+class="btn btn-danger rejectBtn">
+
+Reject
+
+</button>
+
+<button
+class="btn btn-success approveBtn">
+
+Approve
+
+</button>
+
+`;
+
+                            btnRow
+
+                                .querySelector(
+                                    ".rejectBtn"
+                                )
+
+                                .onclick = () => {
+
+                                    updateStatus(
+
+                                        bookingDoc.id,
+
+                                        "rejected"
+
+                                    );
+
+                                };
+
+                            btnRow
+
+                                .querySelector(
+                                    ".approveBtn"
+                                )
+
+                                .onclick = () => {
+
+                                    updateStatus(
+
+                                        bookingDoc.id,
+
+                                        "approved"
+
+                                    );
+
+                                };
+
+                            card.appendChild(
+                                btnRow
+                            );
+
+                        }
+
+                        amenitiesContainer
+
+                            .appendChild(
+                                card
+                            );
+
+                    }
+
+                },
+
+                (error) => {
+
+                    console.log(
+                        error
+                    );
+
+                    amenitiesContainer.innerHTML = `
+
+<div class="text-danger p-5">
+
+${error.message}
+
+</div>
+
+`;
+
+                }
+
+            );
+
+        }
+
+
+
+        loadBookings();
+
+    </script>
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>

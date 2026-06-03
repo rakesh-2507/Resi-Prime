@@ -1,5 +1,3 @@
-// auth-guard.js
-
 import { auth, db } from "./firebase-config.js";
 
 import {
@@ -12,24 +10,18 @@ import {
   getDoc,
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-// ========================================
-// PROTECT ADMIN PAGES
-// ========================================
 
 onAuthStateChanged(auth, async (user) => {
-  // USER NOT LOGGED IN
   if (!user) {
     window.location.href = "/index.html";
     return;
   }
 
   try {
-    // RELOAD FIRESTORE USER
     const userRef = doc(db, "users", user.uid);
 
     const userSnap = await getDoc(userRef);
 
-    // USER DOC NOT FOUND
     if (!userSnap.exists()) {
       await signOut(auth);
 
@@ -40,14 +32,12 @@ onAuthStateChanged(auth, async (user) => {
 
     const userData = userSnap.data();
 
-    // EMAIL NOT VERIFIED
     if (!user.emailVerified) {
       window.location.href = "/verification.html";
 
       return;
     }
 
-    // ROLE CHECK
     if (userData.role !== "Admin") {
       await signOut(auth);
 
@@ -58,14 +48,12 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    // STATUS CHECK
     if (userData.status !== "approved") {
       window.location.href = "/verification.html";
 
       return;
     }
 
-    // SESSION CHECK
     const isLoggedIn = localStorage.getItem("adminLoggedIn");
 
     if (isLoggedIn !== "true") {

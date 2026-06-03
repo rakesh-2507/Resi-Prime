@@ -16,34 +16,9 @@
 
     <!-- FONT AWESOME -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: #f5f7fb;
-            padding: 30px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: auto;
-        }
-
-        .header {
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #252a34;
-            font-size: 28px;
-        }
-
         .admin-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -164,28 +139,110 @@
 </head>
 
 <body style="display:none;">
-    <div class="container">
+    <button class="menu-toggle" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
 
-        <!-- HEADER -->
-        <div class="header">
 
-            <h1>
-                Pending Admin Approvals
-            </h1>
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+            <a href="/dashboard.html" style="text-decoration: none;color: inherit;">
+                <i class="fa-solid fa-building"></i>
+                Admin Panel
+            </a>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/dashboard.html">
+                    <i class="fa-solid fa-home"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/screens/complaints.html">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Complaints
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/residents.html">
+                    <i class="fa-solid fa-users"></i>
+                    Residents
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/staff.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/gallery.html">
+                    <i class="fa-solid fa-image"></i>
+                    Gallery
+                </a>
+            </li>
+
+            <li>
+                <a href="/screens/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="d-flex justify-content-center">
+            <a href="/dashboard.html" style="display: contents;">
+                <img src="/assets/web_logo_white.png" width="50%" alt="Resi_Prime Logo">
+            </a>
+        </div>
+
+
+    </aside>
+
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <h1>Approval For Admins</h1>
+
+            <div class="admin">
+                <i class="fa-solid fa-user"></i>
+                Welcome Admin
+            </div>
 
         </div>
 
-        <!-- LOADER -->
         <div class="loader" id="loader">
 
             Loading pending admins...
 
         </div>
 
-        <!-- ADMIN LIST -->
         <div class="admin-grid" id="adminGrid"></div>
 
-        <!-- EMPTY -->
         <div class="empty" id="empty" style="display:none;">
 
             <h2>
@@ -193,8 +250,7 @@
             </h2>
 
         </div>
-
-    </div>
+    </main>
 
     <script type="module">
 
@@ -420,6 +476,7 @@
         loadPendingAdmins();
 
     </script>
+    <script type="module" src="/script.js"></script>
 
 </body>
 
